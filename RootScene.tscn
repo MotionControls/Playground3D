@@ -1,5 +1,36 @@
-[gd_scene format=3 uid="uid://dkjg6ea6ffbxq"]
+[gd_scene load_steps=5 format=3 uid="uid://dkjg6ea6ffbxq"]
+
+[ext_resource type="Script" path="res://FPSController.cs" id="1_bqks5"]
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_t7awe"]
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_nndqw"]
+
+[sub_resource type="BoxMesh" id="BoxMesh_fe7qu"]
 
 [node name="Root" type="Node"]
 
 [node name="LevelOrigin" type="Node3D" parent="."]
+
+[node name="Player" type="Node3D" parent="LevelOrigin"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
+script = ExtResource("1_bqks5")
+
+[node name="CharacterBody3D" type="CharacterBody3D" parent="LevelOrigin/Player"]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="LevelOrigin/Player/CharacterBody3D"]
+shape = SubResource("CapsuleShape3D_t7awe")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="LevelOrigin/Player/CharacterBody3D"]
+mesh = SubResource("CapsuleMesh_nndqw")
+
+[node name="Head" type="Node3D" parent="LevelOrigin/Player"]
+
+[node name="Camera3D" type="Camera3D" parent="LevelOrigin/Player/Head"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)
+fov = 100.0
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="LevelOrigin"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.46662, -2.08264)
+mesh = SubResource("BoxMesh_fe7qu")
+skeleton = NodePath("")
