@@ -1,0 +1,5 @@
+[gd_scene format=3 uid="uid://dkjg6ea6ffbxq"]
+
+[node name="Root" type="Node"]
+
+[node name="LevelOrigin" type="Node3D" parent="."]
