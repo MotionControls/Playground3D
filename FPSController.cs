@@ -8,17 +8,21 @@ public partial class FPSController : Node3D
 	private CharacterBody3D nodeBody;
 	private Node3D nodeHead;
 	private Camera3D nodeFirstPersonCamera;
+	private Label playerStatDisplay;
 	
 	// Physics Vars
 	private Vector3 velocity = new Vector3();
+	private Vector2 previousInputDir = new Vector2();
+	private float curSpeed = 0.0f;
 	
-	[Export] public const float maxSpeed = 5.0f;
-	[Export] public const float acceleration = 1.0f;
-	[Export] public const float jumpStrength = 4.5f;
-	[Export] public const float gravity = 980.0f;
-	
+	// Exported variables CANNOT be constants, or they don't show up in the editor.
+	[Export] public float maxSpeed = 5.0f;
+	[Export] public float acceleration = 1.0f;
+	[Export] public float jumpStrength = 4.5f;
+	[Export] public float gravity = 980.0f;
+		
 	// Camera Vars
-	[Export] public const float cameraSensitivity = 0.006f;
+	[Export] public float cameraSensitivity = 0.006f;
 	
 	// Called when the node enters the scene tree for the first time.
 	public override void _Ready()
@@ -27,6 +31,7 @@ public partial class FPSController : Node3D
 		nodeBody = GetNode<CharacterBody3D>("CharacterBody3D");
 		nodeHead = GetNode<Node3D>("Head");
 		nodeFirstPersonCamera = GetNode<Camera3D>("Head/Camera3D");
+		playerStatDisplay = GetParent().GetParent().GetNode<Label>("HUD/PlayerStatDisplay");
 		
 		// Set mouse mode to capture mouse.
 		// This makes it to where the mouse is both invisible and confined to the game window.
@@ -41,23 +46,42 @@ public partial class FPSController : Node3D
 		Vector3 curVelocity = velocity;
 		
 		// Get the direction of movement.
+		// If no "desired movement" is detected, rely on the last known desired direction for sake of acceleration.
 		// "Move_Left", "Move_Right", etc. are all set in the project settings.
-		// To be entirely honest I'm not sure what's happening when assigning movementDirection but I'll look into it at some point.
+		bool movementDesired = true;
 		Vector2 inputDir = Input.GetVector("Move_Left", "Move_Right", "Move_Forward", "Move_Backward");
+		if(inputDir.IsZeroApprox()){
+			inputDir = previousInputDir;
+			movementDesired = false;
+		}
+		previousInputDir = inputDir;
+		
+		// To be entirely honest I'm not sure what's happening when assigning movementDirection but I'll look into it at some point.
 		Vector3 movementDirection = (nodeFirstPersonCamera.GlobalTransform.Basis * new Vector3(inputDir.X, 0, inputDir.Y)).Normalized();
+		
+		// Add or subtract from current speed.
+		// Also clamp between 0 and max speed.
+		curSpeed = Mathf.Clamp(
+			(!movementDesired) ? (curSpeed - acceleration) : (curSpeed + acceleration),
+			0.0f,
+			maxSpeed
+		);
 		
 		// Set velocity...
 		if(movementDirection != Vector3.Zero){	// In case the direction isn't perfectly straight.
-			curVelocity.X = movementDirection.X * maxSpeed;
-			curVelocity.Z = movementDirection.Z * maxSpeed;
+			curVelocity.X = movementDirection.X * curSpeed;
+			curVelocity.Z = movementDirection.Z * curSpeed;
 		}else{									// In case player is looking perfectly straight.
-			curVelocity.X = Mathf.MoveToward(velocity.X, 0, maxSpeed);
-			curVelocity.Z = Mathf.MoveToward(velocity.Z, 0, maxSpeed);
+			curVelocity.X = Mathf.MoveToward(velocity.X, 0, curSpeed);
+			curVelocity.Z = Mathf.MoveToward(velocity.Z, 0, curSpeed);
 		}
 		
 		// Move player.
 		velocity = curVelocity;
 		Position += velocity * (float)delta;
+		
+		// Display player stats.
+		playerStatDisplay.Text = "Speed: " + curSpeed.ToString() + " / " + maxSpeed.ToString() + "\nAcceleration: " + acceleration.ToString();
 	}
 	
 	// Input Hook

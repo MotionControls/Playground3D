@@ -15,6 +15,7 @@
 [node name="Player" type="Node3D" parent="LevelOrigin"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
 script = ExtResource("1_bqks5")
+acceleration = 0.5
 
 [node name="CharacterBody3D" type="CharacterBody3D" parent="LevelOrigin/Player"]
 
@@ -34,3 +35,9 @@ fov = 100.0
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.46662, -2.08264)
 mesh = SubResource("BoxMesh_fe7qu")
 skeleton = NodePath("")
+
+[node name="HUD" type="CanvasLayer" parent="."]
+
+[node name="PlayerStatDisplay" type="Label" parent="HUD"]
+offset_right = 244.0
+offset_bottom = 111.0
